@@ -49,179 +49,34 @@ export default function JobsListPage() {
   const [statusFilter, setStatusFilter] = useState<JobStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Replace with: const { data: jobs, loading } = useJobs();
-  const jobs = PLACEHOLDER_JOBS;
-  const loading = false;
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  async function loadJobs() {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/jobs');
+      if (response.ok) {
+        const data = await response.json();
+        setJobs(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to load jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const filteredJobs = jobs.filter(job => {
     const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          job.client.name.toLowerCase().includes(searchQuery.toLowerCase());
+                          job.company?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
-
-  const stats = {
-    total: jobs.length,
-    active: jobs.filter(j => j.status === 'active').length,
-    draft: jobs.filter(j => j.status === 'draft').length,
-    filled: jobs.filter(j => j.filled_positions === j.num_positions).length
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Jobs</h1>
-              <p className="text-gray-600 mt-1">
-                Manage all your open positions
-              </p>
-            </div>
-            <button
-              onClick={() => router.push('/jobs/new')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md flex items-center gap-2 font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              Create Job
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <StatCard
-              label="Total Jobs"
-              value={stats.total}
-              icon={Briefcase}
-              color="blue"
-            />
-            <StatCard
-              label="Active"
-              value={stats.active}
-              icon={Play}
-              color="green"
-            />
-            <StatCard
-              label="Drafts"
-              value={stats.draft}
-              icon={Edit2}
-              color="yellow"
-            />
-            <StatCard
-              label="Filled"
-              value={stats.filled}
-              icon={CheckCircle}
-              color="purple"
-            />
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="bg-white rounded-xl border shadow-sm p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search jobs by title or client..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as JobStatus)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="on_hold">On Hold</option>
-              <option value="closed">Closed</option>
-            </select>
-
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow' : 'hover:bg-gray-200'}`}
-                title="Grid View"
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow' : 'hover:bg-gray-200'}`}
-                title="List View"
-              >
-                <List className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={`p-2 rounded ${viewMode === 'kanban' ? 'bg-white shadow' : 'hover:bg-gray-200'}`}
-                title="Kanban View"
-              >
-                <Trello className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Filters Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-            >
-              <Filter className="w-5 h-5" />
-              Filters
-            </button>
-          </div>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                <option>All Clients</option>
-              </select>
-              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                <option>All Priorities</option>
-                <option>Urgent</option>
-                <option>High</option>
-                <option>Medium</option>
-                <option>Low</option>
-              </select>
-              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                <option>Contract Type</option>
-                <option>Freelance</option>
-                <option>Permanent</option>
-              </select>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <LoadingState />
-        ) : filteredJobs.length === 0 ? (
-          <EmptyState
-            hasJobs={jobs.length > 0}
-            onCreateJob={() => router.push('/jobs/new')}
-          />
-        ) : (
-          <>
-            {viewMode === 'grid' && <GridView jobs={filteredJobs} />}
-            {viewMode === 'list' && <ListView jobs={filteredJobs} />}
-            {viewMode === 'kanban' && <KanbanView jobs={filteredJobs} />}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // Grid View Component
 function GridView({ jobs }: { jobs: Job[] }) {
@@ -268,6 +123,22 @@ function GridView({ jobs }: { jobs: Job[] }) {
               <span>{job.candidates_count} candidates</span>
             </div>
           </div>
+          {loading ? (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading jobs...</p>
+        </div>
+      </div>
+    ) : filteredJobs.length === 0 ? (
+      <EmptyState hasJobs={jobs.length > 0} onCreateJob={() => router.push('/jobs/new')} />
+    ) : (
+      <>
+        {viewMode === 'grid' && <GridView jobs={filteredJobs} />}
+        {viewMode === 'list' && <ListView jobs={filteredJobs} />}
+        {viewMode === 'kanban' && <KanbanView jobs={filteredJobs} />}
+      </>
+    )}
 
           {/* Progress */}
           <div className="mb-3">

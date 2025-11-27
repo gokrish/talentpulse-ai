@@ -28,6 +28,7 @@ interface NavItem {
   submenu?: { label: string; href: string; }[];
 }
 
+// NavItems array
 const navItems: NavItem[] = [
   {
     label: 'Dashboard',
@@ -41,8 +42,7 @@ const navItems: NavItem[] = [
     submenu: [
       { label: 'All Jobs', href: '/jobs' },
       { label: 'Create Job', href: '/jobs/new' },
-      { label: 'Active Jobs', href: '/jobs?status=active' },
-      { label: 'Closed Jobs', href: '/jobs?status=closed' }
+      { label: 'Active Jobs', href: '/jobs?status=active' }
     ]
   },
   {

@@ -246,3 +246,57 @@ export interface AuthenticityReport {
   }[];
   verificationQuestions: string[];
 }
+export interface Job {
+  id: string;
+  title: string;
+  company?: string;
+  description: string;
+  required_skills: string[];
+  preferred_skills: string[];
+  min_experience?: number;
+  max_experience?: number;
+  education_level?: string;
+  location_type: 'remote' | 'hybrid' | 'onsite' | 'any';
+  locations: string[];
+  seniority_level: 'intern' | 'junior' | 'mid' | 'senior' | 'lead' | 'executive';
+  analysis?: any;
+  analysis_confidence?: number;
+  status: 'active' | 'archived' | 'draft';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  type: 'direct' | 'agency';
+  status: 'active' | 'inactive' | 'prospect';
+  primary_contact_name: string;
+  primary_contact_email: string;
+  primary_contact_phone?: string;
+  primary_contact_title?: string;
+  additional_contacts?: Contact[];
+  industry?: string;
+  company_size?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  total_jobs: number;
+  active_jobs: number;
+  total_placements: number;
+  total_revenue?: number;
+  created_at: string;
+  last_contact?: string;
+  notes?: string;
+  tags?: string[];
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  title: string;
+  email: string;
+  phone?: string;
+  is_primary: boolean;
+}
